@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Namespace
+metadata:
+  name: notejam
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notejam-deployment
+  namespace: notejam
+  labels:
+    app: notejam
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notejam
+  template:
+    metadata:
+      labels:
+        app: notejam
+    spec:
+      containers:
+      - name: test
+        image: public.ecr.aws/m1g3e4z9/flaskrepo:v2
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SQLALCHEMY_DATABASE_URI
+          value: mysql://<user>:<password>@<database-url>/<database-name>
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notejam-service
+  namespace: notejam
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: LoadBalancer
+  selector:
+    app: notejam
